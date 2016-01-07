@@ -1,4 +1,4 @@
-package stormvada
+package vada
 
 import (
 	"encoding/json"
@@ -9,26 +9,17 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	sj "github.com/robsix/json"
+	. "github.com/robsix/json"
+	"mime/multipart"
 )
 
 const (
 	accessTokenExpirationBuffer = time.Duration(-10) * time.Second
 )
 
-type VadaClient interface {
-	CreateBucket(bucketKey string, policyKey BucketPolicy) (*sj.Json, error)
-	GetBucketDetails(bucketKey string) (*sj.Json, error)
-	GetSupportedFormats() (*sj.Json, error)
-	UploadObject(objectKey string, bucketKey string, objectReader io.Reader) (*sj.Json, error)
-	RegisterObject(b64Urn string) (*sj.Json, error)
-	GetObjectInfo(b64Urn string, guid string) (*sj.Json, error)
-	GetObjectItem(b64UrnAndItemPath string) (*http.Response, error)
-	GetObjectSeedFile(objectKey string, bucketKey string) (*http.Response, error)
-}
-
-func NewVadaClient(clientKey string, clientSecret string, log golog.Log) VadaClient {
+func NewVadaClient(vadaHost string, clientKey string, clientSecret string, log golog.Log) VadaClient {
 	return &vadaClient{
+		host:	  vadaHost,
 		clientKey:    clientKey,
 		clientSecret: clientSecret,
 		log:          log,
@@ -36,6 +27,7 @@ func NewVadaClient(clientKey string, clientSecret string, log golog.Log) VadaCli
 }
 
 type vadaClient struct {
+	host			   string
 	clientKey          string
 	clientSecret       string
 	accessToken        string
@@ -50,7 +42,7 @@ func (v *vadaClient) getAccessToken() (string, error) {
 		v.mtx.Lock()
 		if time.Now().After(v.accessTokenExpires.Add(accessTokenExpirationBuffer)) {
 			v.log.Info("VadaClient.getAccessToken requesting new token")
-			accessToken, err := getAccessToken(v.clientKey, v.clientSecret)
+			accessToken, err := getAccessToken(v.host, v.clientKey, v.clientSecret)
 			if err != nil {
 				v.log.Critical("VadaClient.getAccessToken error: ", err)
 				return "", err
@@ -64,76 +56,76 @@ func (v *vadaClient) getAccessToken() (string, error) {
 	return v.accessToken, nil
 }
 
-func (v *vadaClient) CreateBucket(bucketKey string, policyKey BucketPolicy) (*sj.Json, error) {
+func (v *vadaClient) CreateBucket(bucketKey string, policyKey bucketPolicy) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return createBucket(bucketKey, policyKey, token)
+	return createBucket(v.host, bucketKey, policyKey, token)
 }
 
-func (v *vadaClient) GetBucketDetails(bucketKey string) (*sj.Json, error) {
+func (v *vadaClient) GetBucketDetails(bucketKey string) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return getBucketDetails(bucketKey, token)
+	return getBucketDetails(v.host, bucketKey, token)
 }
 
-func (v *vadaClient) GetSupportedFormats() (*sj.Json, error) {
+func (v *vadaClient) GetSupportedFormats() (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return getSupportedFormats(token)
+	return getSupportedFormats(v.host, token)
 }
 
-func (v *vadaClient) UploadObject(objectKey string, bucketKey string, objectReader io.Reader) (*sj.Json, error) {
+func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file multipart.File) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return uploadObject(objectKey, bucketKey, objectReader, token)
+	return uploadFile(v.host, objectKey, bucketKey, file, token)
 }
 
-func (v *vadaClient) RegisterObject(b64Urn string) (*sj.Json, error) {
+func (v *vadaClient) RegisterFile(b64Urn string) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return registerObject(b64Urn, token)
+	return registerFile(v.host, b64Urn, token)
 }
 
-func (v *vadaClient) GetObjectInfo(b64Urn string, guid string) (*sj.Json, error) {
+func (v *vadaClient) GetDocumentInfo(b64Urn string, guid string) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return getObjectInfo(b64Urn, guid, token)
+	return getDocumentInfo(v.host, b64Urn, guid, token)
 }
 
-func (v *vadaClient) GetObjectItem(b64UrnAndItemPath string) (*http.Response, error) {
+func (v *vadaClient) GetSheetItem(b64UrnAndItemPath string) (*http.Response, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return getObjectItem(b64UrnAndItemPath, token)
+	return getSheetItem(v.host, b64UrnAndItemPath, token)
 }
 
-func (v *vadaClient) GetObjectSeedFile(objectKey string, bucketKey string) (*http.Response, error) {
+func (v *vadaClient) GetSeedFile(objectKey string, bucketKey string) (*http.Response, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
 	}
 
-	return getObjectSeedFile(objectKey, bucketKey, token)
+	return getSeedFile(v.host, objectKey, bucketKey, token)
 }
 
 /**
@@ -145,7 +137,7 @@ func checkResponse(resp *http.Response, err error) error {
 		return err
 	}
 	if resp.StatusCode >= 400 {
-		body, _ := sj.FromReadCloser(resp.Body)
+		body, _ := FromReadCloser(resp.Body)
 		bodyStr, _ := body.ToString()
 		return errors.New(fmt.Sprintf("statusCode: %d, status: %v, body: %v", resp.StatusCode, resp.Status, bodyStr))
 	}
@@ -184,13 +176,13 @@ func doStructuredJsonRequest(req *http.Request, dst interface{}) error {
 	return nil
 }
 
-func doAdhocJsonRequest(req *http.Request) (ret *sj.Json, err error) {
+func doAdhocJsonRequest(req *http.Request) (ret *Json, err error) {
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if resp != nil {
 		err = checkResponse(resp, err)
 		if err == nil {
-			ret, err = sj.FromReadCloser(resp.Body)
+			ret, err = FromReadCloser(resp.Body)
 		}
 	}
 	return

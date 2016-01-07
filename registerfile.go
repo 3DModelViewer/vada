@@ -1,4 +1,4 @@
-package stormvada
+package vada
 
 import (
 	sj "github.com/robsix/json"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func registerObject(b64Urn string, accessToken string) (ret *sj.Json, err error) {
+func registerFile(host string, b64Urn string, accessToken string) (ret *sj.Json, err error) {
 	data, err := sj.FromString(`{"urn":"`+b64Urn+`"}`)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func registerObject(b64Urn string, accessToken string) (ret *sj.Json, err error)
 		return nil, err
 	}
 
-	req, err := newRequest("POST", "https://developer.api.autodesk.com/viewingservice/v1/register", reader, accessToken, "application/json")
+	req, err := newRequest("POST", host + "/viewingservice/v1/register", reader, accessToken, "application/json")
 	if err != nil {
 		return nil, err
 	}
