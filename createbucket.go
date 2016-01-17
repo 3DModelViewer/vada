@@ -6,7 +6,7 @@ import (
 	. "github.com/robsix/json"
 )
 
-func createBucket(host string, bucketKey string, policyKey bucketPolicy, accessToken string) (ret *Json, err error) {
+func createBucket(host string, bucketKey string, policyKey BucketPolicy, accessToken string) (ret *Json, err error) {
 	re := regexp.MustCompile(bucketValidationRegexp)
 	if !re.MatchString(bucketKey) {
 		return nil, errors.New("invalid bucket name: " + bucketKey + " must match regexp: " + bucketValidationRegexp)

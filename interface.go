@@ -7,7 +7,7 @@ import(
 )
 
 type VadaClient interface {
-	CreateBucket(bucketKey string, policyKey bucketPolicy) (*Json, error)
+	CreateBucket(bucketKey string, policyKey BucketPolicy) (*Json, error)
 	GetBucketDetails(bucketKey string) (*Json, error)
 	GetSupportedFormats() (*Json, error)
 	UploadFile(objectKey string, bucketKey string, file multipart.File) (*Json, error)

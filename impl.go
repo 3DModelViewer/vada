@@ -56,7 +56,7 @@ func (v *vadaClient) getAccessToken() (string, error) {
 	return v.accessToken, nil
 }
 
-func (v *vadaClient) CreateBucket(bucketKey string, policyKey bucketPolicy) (*Json, error) {
+func (v *vadaClient) CreateBucket(bucketKey string, policyKey BucketPolicy) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
