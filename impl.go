@@ -119,7 +119,7 @@ func (v *vadaClient) GetSheetItem(b64UrnAndItemPath string) (*http.Response, err
 	return getSheetItem(v.host, b64UrnAndItemPath, token)
 }
 
-func (v *vadaClient) GetSeedFile(objectKey string, bucketKey string) (*http.Response, error) {
+func (v *vadaClient) GetFile(objectKey string, bucketKey string) (*http.Response, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err

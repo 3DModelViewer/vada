@@ -1,8 +1,7 @@
 package vada
 
 import (
-	"git.autodesk.com/typhoon/stormfront/src/server/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
-	sj "git.autodesk.com/typhoon/stormfront/src/server/Godeps/_workspace/src/github.com/robsix/json"
+	sj "github.com/robsix/json"
 	"net/url"
 	"mime/multipart"
 )
@@ -13,7 +12,7 @@ func uploadFile(host string, objectKey string, bucketKey string, file multipart.
 		return nil, err
 	}
 
-	url.Path += uuid.New() + objectKey
+	url.Path += objectKey
 
 	req, err := newRequest("PUT", url.String(), file, accessToken, "application/octet-stream")
 	if err != nil {
