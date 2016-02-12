@@ -1,13 +1,14 @@
 package main
 
 import (
-	"git.autodesk.com/typhoon/stormvada"
+	"github.com/modelhub/vada"
 	"github.com/robsix/golog"
 	"net/http"
 	"encoding/base64"
 )
 
 const (
+	vadaHost = "https://developer.api.autodesk.com"
 	clientKey    = "vzZyhg9MZwhZhptG6JqCeR6gQorM8xvW"
 	clientSecret = "Xc900b546fdb941f"
 	bucketName   = "transient_01"
@@ -15,20 +16,20 @@ const (
 
 func main() {
 	log := golog.NewConsoleLog(0)
-	vadaClient := stormvada.NewVadaClient(clientKey, clientSecret, log)
+	vadaClient := vada.NewVadaClient(vadaHost, clientKey, clientSecret, log)
 
-	log.Info(vadaClient.CreateBucket(bucketName, stormvada.Transient))
-	log.Info(vadaClient.GetBucketDetails(bucketName))
-	log.Info(vadaClient.GetSupportedFormats())
+	vadaClient.CreateBucket(bucketName, vada.Transient)
+	vadaClient.GetBucketDetails(bucketName)
+	vadaClient.GetSupportedFormats()
 
 	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		file, header, _ := r.FormFile("file")
-		obj, err := vadaClient.UploadObject(header.Filename, bucketName, file)
-		log.Info(obj, err)
+		obj, err := vadaClient.UploadFile(header.Filename, bucketName, file)
+		log.Info("%v %v", obj, err)
 		urn, _ := obj.String("objectId")
 		urn = base64.StdEncoding.EncodeToString([]byte(urn))
-		log.Info(vadaClient.RegisterObject(urn))
-		log.Info(vadaClient.GetObjectInfo(urn, ""))
+		vadaClient.RegisterFile(urn)
+		vadaClient.GetDocumentInfo(urn, "")
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

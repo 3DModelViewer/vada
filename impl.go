@@ -44,13 +44,13 @@ func (v *vadaClient) getAccessToken() (string, error) {
 			v.log.Info("VadaClient.getAccessToken requesting new token")
 			accessToken, err := getAccessToken(v.host, v.clientKey, v.clientSecret)
 			if err != nil {
-				v.log.Critical("VadaClient.getAccessToken error: ", err)
+				v.log.Critical("VadaClient.getAccessToken error: %v", err)
 				return "", err
 			}
 			v.accessToken = accessToken.Token
 			expiresDuration := time.Duration(accessToken.Expires) * time.Second
 			v.accessTokenExpires = time.Now().Add(expiresDuration)
-			v.log.Info("VadaClient.getAccessToken retrieved new access token: ", v.accessToken, " expires in: ", expiresDuration)
+			v.log.Info("VadaClient.getAccessToken retrieved new access token: %q expires in: %v", v.accessToken, expiresDuration)
 		}
 	}
 	return v.accessToken, nil
@@ -63,6 +63,15 @@ func (v *vadaClient) CreateBucket(bucketKey string, policyKey BucketPolicy) (*Js
 	}
 
 	return createBucket(v.host, bucketKey, policyKey, token)
+}
+
+func (v *vadaClient) DeleteBucket(bucketKey string) error {
+	token, err := v.getAccessToken()
+	if err != nil {
+		return err
+	}
+
+	return deleteBucket(v.host, bucketKey, token)
 }
 
 func (v *vadaClient) GetBucketDetails(bucketKey string) (*Json, error) {
@@ -90,6 +99,15 @@ func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file multipa
 	}
 
 	return uploadFile(v.host, objectKey, bucketKey, file, token)
+}
+
+func (v *vadaClient) DeleteFile(objectKey string, bucketKey string) error {
+	token, err := v.getAccessToken()
+	if err != nil {
+		return err
+	}
+
+	return deleteFile(v.host, objectKey, bucketKey, token)
 }
 
 func (v *vadaClient) RegisterFile(b64Urn string) (*Json, error) {
