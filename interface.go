@@ -1,17 +1,17 @@
 package vada
 
-import(
+import (
 	. "github.com/robsix/json"
+	"io"
 	"net/http"
-	"mime/multipart"
 )
 
 type VadaClient interface {
 	CreateBucket(bucketKey string, policyKey BucketPolicy) (*Json, error)
-	DeleteBucket(bucketKey string) (error)
+	DeleteBucket(bucketKey string) error
 	GetBucketDetails(bucketKey string) (*Json, error)
 	GetSupportedFormats() (*Json, error)
-	UploadFile(objectKey string, bucketKey string, file multipart.File) (*Json, error)
+	UploadFile(objectKey string, bucketKey string, file io.ReadCloser) (*Json, error)
 	DeleteFile(objectKey string, bucketKey string) error
 	RegisterFile(b64Urn string) (*Json, error)
 	GetDocumentInfo(b64Urn string, guid string) (*Json, error)

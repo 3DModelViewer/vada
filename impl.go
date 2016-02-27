@@ -5,12 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/robsix/golog"
+	. "github.com/robsix/json"
 	"io"
 	"net/http"
 	"sync"
 	"time"
-	. "github.com/robsix/json"
-	"mime/multipart"
 )
 
 const (
@@ -19,7 +18,7 @@ const (
 
 func NewVadaClient(vadaHost string, clientKey string, clientSecret string, log golog.Log) VadaClient {
 	return &vadaClient{
-		host:	  vadaHost,
+		host:         vadaHost,
 		clientKey:    clientKey,
 		clientSecret: clientSecret,
 		log:          log,
@@ -27,7 +26,7 @@ func NewVadaClient(vadaHost string, clientKey string, clientSecret string, log g
 }
 
 type vadaClient struct {
-	host			   string
+	host               string
 	clientKey          string
 	clientSecret       string
 	accessToken        string
@@ -92,7 +91,7 @@ func (v *vadaClient) GetSupportedFormats() (*Json, error) {
 	return getSupportedFormats(v.host, token)
 }
 
-func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file multipart.File) (*Json, error) {
+func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file io.ReadCloser) (*Json, error) {
 	token, err := v.getAccessToken()
 	if err != nil {
 		return nil, err
@@ -198,6 +197,9 @@ func doAdhocJsonRequest(req *http.Request) (ret *Json, err error) {
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if resp != nil {
+		if resp.Body != nil {
+			defer resp.Body.Close()
+		}
 		err = checkResponse(resp, err)
 		if err == nil {
 			ret, err = FromReadCloser(resp.Body)
