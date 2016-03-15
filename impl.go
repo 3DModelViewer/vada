@@ -61,7 +61,13 @@ func (v *vadaClient) CreateBucket(bucketKey string, policyKey BucketPolicy) (*Js
 		return nil, err
 	}
 
-	return createBucket(v.host, bucketKey, policyKey, token)
+	res, err := createBucket(v.host, bucketKey, policyKey, token)
+	if err != nil {
+		v.log.Error("Vada.CreateBucket Error: bucketKey: %q bucketPolicy: %q error: %v", bucketKey, policyKey, err)
+	} else {
+		v.log.Info("Vada.CreateBucket Success: bucketKey: %q bucketPolicy: %q", bucketKey, policyKey)
+	}
+	return res, err
 }
 
 func (v *vadaClient) DeleteBucket(bucketKey string) error {
@@ -70,7 +76,13 @@ func (v *vadaClient) DeleteBucket(bucketKey string) error {
 		return err
 	}
 
-	return deleteBucket(v.host, bucketKey, token)
+	err = deleteBucket(v.host, bucketKey, token)
+	if err != nil {
+		v.log.Error("Vada.DeleteBucket Error: bucketKey: %q error %v", bucketKey, err)
+	} else {
+		v.log.Info("Vada.DeleteBucket Success: bucketKey: %q", bucketKey)
+	}
+	return err
 }
 
 func (v *vadaClient) GetBucketDetails(bucketKey string) (*Json, error) {
@@ -79,7 +91,13 @@ func (v *vadaClient) GetBucketDetails(bucketKey string) (*Json, error) {
 		return nil, err
 	}
 
-	return getBucketDetails(v.host, bucketKey, token)
+	res, err := getBucketDetails(v.host, bucketKey, token)
+	if err != nil {
+		v.log.Error("Vada.GetBucketDetails Error: bucketKey: %q error: %v", bucketKey, err)
+	} else {
+		v.log.Info("Vada.GetBucketDetails Success: bucketKey: %q", bucketKey)
+	}
+	return res, err
 }
 
 func (v *vadaClient) GetSupportedFormats() (*Json, error) {
@@ -88,7 +106,13 @@ func (v *vadaClient) GetSupportedFormats() (*Json, error) {
 		return nil, err
 	}
 
-	return getSupportedFormats(v.host, token)
+	res, err := getSupportedFormats(v.host, token)
+	if err != nil {
+		v.log.Error("Vada.GetSupportedFormats Error: %v", err)
+	} else {
+		v.log.Info("Vada.GetSupportedFormats Success")
+	}
+	return res, err
 }
 
 func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file io.ReadCloser) (*Json, error) {
@@ -97,7 +121,13 @@ func (v *vadaClient) UploadFile(objectKey string, bucketKey string, file io.Read
 		return nil, err
 	}
 
-	return uploadFile(v.host, objectKey, bucketKey, file, token)
+	res, err := uploadFile(v.host, objectKey, bucketKey, file, token)
+	if err != nil {
+		v.log.Error("Vada.UploadFile Error: objectKey: %q bucketKey: %q error: %v", objectKey, bucketKey, err)
+	} else {
+		v.log.Info("Vada.UploadFile Success: objectKey: %q bucketKey: %q", objectKey, bucketKey)
+	}
+	return res, err
 }
 
 func (v *vadaClient) DeleteFile(objectKey string, bucketKey string) error {
@@ -106,7 +136,13 @@ func (v *vadaClient) DeleteFile(objectKey string, bucketKey string) error {
 		return err
 	}
 
-	return deleteFile(v.host, objectKey, bucketKey, token)
+	err = deleteFile(v.host, objectKey, bucketKey, token)
+	if err != nil {
+		v.log.Error("Vada.DeleteFile Error: objectKey: $q bucketKey: %q error: %v", objectKey, bucketKey, err)
+	} else {
+		v.log.Info("Vada.DeleteFile Success: objectKey: %q bucketKey: %q", objectKey, bucketKey)
+	}
+	return err
 }
 
 func (v *vadaClient) RegisterFile(b64Urn string) (*Json, error) {
@@ -115,7 +151,13 @@ func (v *vadaClient) RegisterFile(b64Urn string) (*Json, error) {
 		return nil, err
 	}
 
-	return registerFile(v.host, b64Urn, token)
+	res, err := registerFile(v.host, b64Urn, token)
+	if err != nil {
+		v.log.Error("Vada.RegisterFile Error: b64Urn: %q error: %v", b64Urn, err)
+	} else {
+		v.log.Info("Vada.RegisterFile Success: b64Urn: %q", b64Urn)
+	}
+	return res, err
 }
 
 func (v *vadaClient) GetDocumentInfo(b64Urn string, guid string) (*Json, error) {
@@ -124,7 +166,13 @@ func (v *vadaClient) GetDocumentInfo(b64Urn string, guid string) (*Json, error) 
 		return nil, err
 	}
 
-	return getDocumentInfo(v.host, b64Urn, guid, token)
+	res, err := getDocumentInfo(v.host, b64Urn, guid, token)
+	if err != nil {
+		v.log.Error("Vada.GetDocumentInfo Error: b64Urn: %q guid: %q error: %v", b64Urn, guid, err)
+	} else {
+		v.log.Info("Vada.GetDocumentInfo Success: b64Urn: %q guid: %q", b64Urn, guid)
+	}
+	return res, err
 }
 
 func (v *vadaClient) GetSheetItem(b64UrnAndItemPath string) (*http.Response, error) {
@@ -133,7 +181,13 @@ func (v *vadaClient) GetSheetItem(b64UrnAndItemPath string) (*http.Response, err
 		return nil, err
 	}
 
-	return getSheetItem(v.host, b64UrnAndItemPath, token)
+	res, err := getSheetItem(v.host, b64UrnAndItemPath, token)
+	if err != nil {
+		v.log.Error("Vada.GetSheetItem Error: b64UrnAndItemPath: %q error: %v", b64UrnAndItemPath, err)
+	} else {
+		v.log.Info("Vada.GetSheetItem Success: b64UrnAndItemPath: %q", b64UrnAndItemPath)
+	}
+	return res, err
 }
 
 func (v *vadaClient) GetFile(objectKey string, bucketKey string) (*http.Response, error) {
@@ -142,7 +196,13 @@ func (v *vadaClient) GetFile(objectKey string, bucketKey string) (*http.Response
 		return nil, err
 	}
 
-	return getSeedFile(v.host, objectKey, bucketKey, token)
+	res, err := getSeedFile(v.host, objectKey, bucketKey, token)
+	if err != nil {
+		v.log.Error("Vada.GetFile Error: objectKey: %q bucketKey: %q error: %v", objectKey, bucketKey, err)
+	} else {
+		v.log.Info("Vada.GetFile Success: objectKey: %q bucketKey: %q", objectKey, bucketKey)
+	}
+	return res, err
 }
 
 /**
