@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	accessTokenExpirationBuffer = time.Duration(-10) * time.Second
+	accessTokenExpirationBuffer = time.Duration(-5) * time.Minute
 )
 
 func NewVadaClient(vadaHost string, clientKey string, clientSecret string, log golog.Log) VadaClient {
