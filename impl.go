@@ -236,8 +236,7 @@ func newRequest(method string, urlStr string, body io.Reader, accessToken string
 }
 
 func doStructuredJsonRequest(req *http.Request, dst interface{}) error {
-	client := http.DefaultClient
-	resp, err := client.Do(req)
+	resp, err := getStandardHttpClient().Do(req)
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
@@ -254,8 +253,7 @@ func doStructuredJsonRequest(req *http.Request, dst interface{}) error {
 }
 
 func doAdhocJsonRequest(req *http.Request) (ret *Json, err error) {
-	client := http.DefaultClient
-	resp, err := client.Do(req)
+	resp, err := getStandardHttpClient().Do(req)
 	if resp != nil {
 		if resp.Body != nil {
 			defer resp.Body.Close()
