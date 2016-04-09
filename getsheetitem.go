@@ -10,8 +10,7 @@ func getSheetItem(host string, b64UrnAndItemPath string, accessToken string) (re
 		return nil, err
 	}
 
-	client := http.DefaultClient
-	ret, err = client.Do(req)
+	ret, err = getHttpClient().Do(req)
 	if ret != nil {
 		err = checkResponse(ret, err)
 	}

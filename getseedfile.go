@@ -10,8 +10,7 @@ func getSeedFile(host string, objectKey string, bucketKey string, accessToken st
 		return nil, err
 	}
 
-	client := http.DefaultClient
-	ret, err = client.Do(req)
+	ret, err = getHttpClient().Do(req)
 	if ret != nil {
 		err = checkResponse(ret, err)
 	}
